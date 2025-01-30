@@ -71,4 +71,4 @@ Conclusion This project significantly enhanced my knowledge of Pipelined Process
 
 # TESTBENCH AND SIMULATION
 
-
+![Image](https://github.com/user-attachments/assets/90b69484-631c-4659-8170-ec8bc65d39aa)
