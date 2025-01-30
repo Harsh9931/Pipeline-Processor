@@ -70,5 +70,5 @@ Pipeline Stalls: The "NOP" (No Operation) instructions appear after the last val
 Conclusion This project significantly enhanced my knowledge of Pipelined Processors and RTL coding. It reinforced the importance of simulation and verification in hardware design, particularly using Vivado. The insights gained from this project will aid me in future endeavors involving VLSI design and digital systems.
 
 # TESTBENCH AND SIMULATION
-
+![Image](https://github.com/user-attachments/assets/90b69484-631c-4659-8170-ec8bc65d39aa)
 ![Image](https://github.com/user-attachments/assets/90b69484-631c-4659-8170-ec8bc65d39aa)
