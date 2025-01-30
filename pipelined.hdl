@@ -1,0 +1,92 @@
+module pipelined_processor (
+    input wire clk,
+    input wire rst
+);
+    // Instruction format: [7:4] Opcode, [3:2] Reg1, [1:0] Reg2
+    reg [7:0] instruction_memory [0:15];  // 16 instructions
+    reg [7:0] register_file [0:3];        // 4 general-purpose registers
+    reg [7:0] pipeline_reg_IF_ID;         // IF/ID pipeline register
+    reg [7:0] pipeline_reg_ID_EX;         // ID/EX pipeline register
+    reg [7:0] pipeline_reg_EX_WB;         // EX/WB pipeline register
+    reg [7:0] ALU_out;                     // ALU output
+
+    // Opcodes
+    localparam ADD  = 4'b0001;
+    localparam SUB  = 4'b0010;
+    localparam AND  = 4'b0011;
+    localparam LOAD = 4'b0100;
+
+    integer i;
+
+    // Initialize instruction memory and registers
+    initial begin
+        // Sample Instructions: Opcode | Reg1 | Reg2
+        instruction_memory[0] = 8'b0001_01_10;  // ADD R1, R2
+        instruction_memory[1] = 8'b0010_10_11;  // SUB R2, R3
+        instruction_memory[2] = 8'b0011_00_01;  // AND R0, R1
+        instruction_memory[3] = 8'b0100_11_00;  // LOAD R3, R0
+
+        // Initialize registers
+        for (i = 0; i < 4; i = i + 1) 
+            register_file[i] = i * 10;  // R0 = 0, R1 = 10, R2 = 20, R3 = 30
+    end
+
+    // Pipeline Stages
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            pipeline_reg_IF_ID <= 0;
+            pipeline_reg_ID_EX <= 0;
+            pipeline_reg_EX_WB <= 0;
+            ALU_out <= 0;
+        end else begin
+            // FETCH Stage
+            pipeline_reg_IF_ID <= instruction_memory[0]; // Simulated fetching instruction 0
+
+            // DECODE Stage
+            pipeline_reg_ID_EX <= pipeline_reg_IF_ID;
+
+            // EXECUTE Stage
+            case (pipeline_reg_ID_EX[7:4])  // Decode opcode
+                ADD:  ALU_out <= register_file[pipeline_reg_ID_EX[3:2]] + register_file[pipeline_reg_ID_EX[1:0]];
+                SUB:  ALU_out <= register_file[pipeline_reg_ID_EX[3:2]] - register_file[pipeline_reg_ID_EX[1:0]];
+                AND:  ALU_out <= register_file[pipeline_reg_ID_EX[3:2]] & register_file[pipeline_reg_ID_EX[1:0]];
+                LOAD: ALU_out <= register_file[pipeline_reg_ID_EX[1:0]]; // Load value from another register
+                default: ALU_out <= 0;
+            endcase
+
+            pipeline_reg_EX_WB <= ALU_out;
+
+            // WRITE BACK Stage
+            register_file[pipeline_reg_ID_EX[3:2]] <= pipeline_reg_EX_WB;
+        end
+    end
+endmodule
+
+Testbench Code:
+
+`timescale 1ns/1ps
+
+module tb_pipelined_processor;
+    reg clk;
+    reg rst;
+
+    // Instantiate processor
+    pipelined_processor uut (
+        .clk(clk),
+        .rst(rst)
+    );
+
+    // Clock generation
+    always #5 clk = ~clk;
+
+    initial begin
+        // Initialize signals
+        clk = 0;
+        rst = 1;
+        #10 rst = 0;
+
+        // Run simulation for a few cycles
+        #50;
+        $finish;
+    end
+endmodule
